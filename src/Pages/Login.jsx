@@ -61,11 +61,11 @@ const Login = () => {
             toast.error('Failed to verify OTP.');
         }
     };
-
+// 
     return (
         <div className="login-container">
             <div className="login-box">
-                <h2>Login to</h2>
+                <h2>Login to NotifySeat</h2>
                 {!isOtpSent ? (
                     <div>
                         <input

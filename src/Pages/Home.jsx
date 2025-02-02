@@ -127,7 +127,7 @@ const Home = () => {
             <div style={containerStyle}>
                 <div style={cardStyle}>
                     <div style={headerContainerStyle}>
-                        <h1 style={headerStyle}>Welcome to </h1>
+                        <h1 style={headerStyle}>Welcome to NotifySeat</h1>
                         <button onClick={handleLogout} style={logoutButtonStyle}>Logout</button>
                     </div>
 
