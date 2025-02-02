@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './Login.css'; // Import updated CSS file
 import { useNavigate } from 'react-router-dom';
-import { Toaster, toast } from 'react-hot-toast'; // Import React Hot Toast
+import { Toaster, toast } from 'react-hot-toast';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [isOtpSent, setIsOtpSent] = useState(false);
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate(); 
 
     // Validate email format
     const isValidEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple regex for email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
         return emailRegex.test(email);
     };
 
@@ -64,6 +64,7 @@ const Login = () => {
 // 
     return (
         <div className="login-container">
+             <Toaster /> 
             <div className="login-box">
                 <h2>Login to NotifySeat</h2>
                 {!isOtpSent ? (

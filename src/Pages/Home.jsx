@@ -19,7 +19,6 @@ const Home = () => {
 
     const token = localStorage.getItem('token');
 
-    // Fetch courses on page load
     useEffect(() => {
         if (!token) {
             toast.error("Authentication failed. Redirecting to login...");
@@ -33,7 +32,7 @@ const Home = () => {
                 throw new Error("Invalid token structure");
             }
             setUserEmail(decodedToken.email);
-            fetchCourses(decodedToken.email); // Automatically fetch courses after login
+            fetchCourses(decodedToken.email); 
         } catch (error) {
             toast.error("Invalid or expired token. Redirecting to login...");
             localStorage.removeItem('token');
