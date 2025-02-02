@@ -113,7 +113,7 @@ const Home = () => {
 
     return (
         <div>
-            <Toaster position="top-right" reverseOrder={false} />
+            <Toaster position="top-center" reverseOrder={false} />
 
             <div style={containerStyle}>
                 <div style={cardStyle}>
@@ -175,20 +175,20 @@ const Home = () => {
         Developed by 
         <span style={developerStyle}>
             Tanvir Ishtiaq 
-            <a href="https://github.com/tanvirishtiaq" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
+            <a href="https://github.com/TanvirXen" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
                 <FaGithub size={20} />
             </a>
-            <a href="https://linkedin.com/in/tanvirishtiaq" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
+            <a href="https://www.linkedin.com/in/tanvir-ishtiaq/" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
                 <FaLinkedin size={20} />
             </a>
         </span>
         <span>&</span>
         <span style={developerStyle}>
             Farhan Mahmud 
-            <a href="https://github.com/farhanmahmud" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
+            <a href="https://github.com/far-han12" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
                 <FaGithub size={20} />
             </a>
-            <a href="https://linkedin.com/in/farhanmahmud" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
+            <a href="https://www.linkedin.com/in/farhan-mahmud/" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
                 <FaLinkedin size={20} />
             </a>
         </span>
