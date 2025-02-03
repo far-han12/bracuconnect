@@ -103,6 +103,11 @@ const Login = () => {
                 </div>
             </div>
 
+            {/* Maintenance Notice */}
+            <div style={styles.maintenanceNotice}>
+                <p>⚠️ The system is currently under maintenance.Our website will go live 15 minutes before advising begins.Thank you for your patience!</p>
+            </div>
+
             <footer style={styles.footer}>
                 <p>Developed by 
                     <span style={styles.dev}>
@@ -125,7 +130,6 @@ const Login = () => {
                         </a>
                     </span>
                 </p>
-          
             </footer>
         </div>
     );
@@ -138,7 +142,6 @@ const styles = {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-
         padding: '1rem',
     },
     card: {
@@ -195,6 +198,17 @@ const styles = {
     },
     buttonSpacing: {
         marginTop: '1rem', 
+    },
+    maintenanceNotice: {
+        marginTop: '1rem',
+        padding: '1rem',
+        backgroundColor: '#fff3cd',
+        color: '#856404',
+        borderRadius: '8px',
+        border: '1px solid #ffeeba',
+        textAlign: 'center',
+        maxWidth: '400px',
+        width: '100%',
     },
     footer: {
         textAlign: 'center',
