@@ -201,7 +201,7 @@ const styles = {
         marginTop: '3rem',
         color: '#64748b',
         padding: '2rem',
-        fontSize: '0.9rem',
+        fontSize: '1rem',
     },
     dev: {
         display: 'inline-flex',

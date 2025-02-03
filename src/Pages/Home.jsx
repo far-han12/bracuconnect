@@ -22,6 +22,7 @@ const Home = () => {
 
     const token = localStorage.getItem('token');
 // 
+// 
     useEffect(() => {
         if (!token) {
             console.log("Authentication failed. Redirecting to login...");
@@ -417,7 +418,7 @@ const styles = {
     },
     tab: {
         flex: 1,
-        padding: '1rem',
+        padding: '0.9rem',
         border: 'none',
         borderRadius: '8px',
         backgroundColor: '#f3f4f6',
@@ -426,7 +427,7 @@ const styles = {
     },
     activeTab: {
         flex: 1,
-        padding: '1rem',
+        padding: '0.9rem',
         border: 'none',
         borderRadius: '8px',
         backgroundColor: '#2563eb',
@@ -526,7 +527,7 @@ const styles = {
         marginTop: '3rem',
         color: '#64748b',
         padding: '2rem',
-        fontSize: '0.9rem'
+        fontSize: '1rem'
     },
     dev: {
         display: 'inline-flex',
