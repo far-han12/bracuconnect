@@ -52,7 +52,7 @@ const Login = () => {
                 localStorage.setItem('token', response.data.token);
                 toast.success('OTP verified successfully. You are now logged in.');
                 setTimeout(() => {
-                    navigate('/'); 
+                    navigate('/'); // Redirect to home page
                 }, 1500);
             } else {
                 toast.error('Failed to verify OTP.');
@@ -81,6 +81,7 @@ const Login = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 style={styles.input}
                             />
+                            <div style={styles.buttonSpacing}></div>
                             <button onClick={handleSendOtp} style={styles.submitButton}>
                                 Send OTP
                             </button>
@@ -94,7 +95,8 @@ const Login = () => {
                                 onChange={(e) => setOtp(e.target.value)}
                                 style={styles.input}
                             />
-                            <button onClick={handleVerifyOtp} style={styles.submitButton}>
+                            <div style={styles.buttonSpacing}></div>
+                            <button onClick={handleVerifyOtp} style={styles.verifyButton}>
                                 Verify OTP
                             </button>
                         </div>
@@ -124,7 +126,7 @@ const Login = () => {
                         </a>
                     </span>
                 </p>
-                <p>© {new Date().getFullYear()} All rights reserved</p>
+          
             </footer>
         </div>
     );
@@ -132,7 +134,7 @@ const Login = () => {
 
 const styles = {
     container: {
-        minHeight: '90vh',
+        minHeight: '80vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -179,8 +181,21 @@ const styles = {
         cursor: 'pointer',
         fontSize: '1rem',
         fontWeight: '500',
-        width:"100%",
-        marginTop:"15px"
+        width: '100%',
+    },
+    verifyButton: {
+        backgroundColor: '#10b981', // Green color
+        color: 'white',
+        padding: '1rem',
+        borderRadius: '8px',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '1rem',
+        fontWeight: '500',
+        width: '100%',
+    },
+    buttonSpacing: {
+        marginTop: '1rem', // Space between input and button
     },
     footer: {
         textAlign: 'center',
