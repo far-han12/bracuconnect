@@ -66,11 +66,11 @@ const Login = () => {
             <Toaster position="top-center" />
             <div style={styles.card}>
                 <div style={styles.header}>
-                    <h1 style={styles.title}>NotifySeat</h1>
+                    <h1 style={styles.title}>Seat Monitor</h1>
                 </div>
 
                 <div style={styles.form}>
-                    <h2>Login to NotifySeat</h2>
+                    <h2>Login to Seat Monitor</h2>
                     {!isOtpSent ? (
                         <div>
                             <input

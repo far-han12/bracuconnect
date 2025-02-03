@@ -162,7 +162,7 @@ const Home = () => {
             
             <div style={styles.card}>
                 <div style={styles.header}>
-                    <h1 style={styles.title}>NotifySeat</h1>
+                    <h1 style={styles.title}>Seat Monitor</h1>
                     <button onClick={handleLogout} style={styles.logoutButton}>
                         Logout
                     </button>
