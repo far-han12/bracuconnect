@@ -10,7 +10,6 @@ const Login = () => {
     const [isOtpSent, setIsOtpSent] = useState(false);
     const navigate = useNavigate();
 
-    // Validate email format
     const isValidEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
@@ -131,7 +130,7 @@ const Login = () => {
         </div>
     );
 };
-
+// 
 const styles = {
     container: {
         minHeight: '80vh',
@@ -184,7 +183,7 @@ const styles = {
         width: '100%',
     },
     verifyButton: {
-        backgroundColor: '#10b981', // Green color
+        backgroundColor: '#10b981', 
         color: 'white',
         padding: '1rem',
         borderRadius: '8px',
@@ -195,8 +194,7 @@ const styles = {
         width: '100%',
     },
     buttonSpacing: {
-        marginTop: '1rem', // Space between input and button
-    },
+        marginTop: '1rem', 
     footer: {
         textAlign: 'center',
         marginTop: '3rem',
@@ -215,6 +213,6 @@ const styles = {
         color: '#475569',
         marginLeft: '0.5rem',
     },
-};
+}};
 
 export default Login;
