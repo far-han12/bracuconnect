@@ -67,11 +67,10 @@ const Home = () => {
             const userData = response.data.userData || [];
             setCourses(userData);
     
-            // If user has courses, get the first course’s email interval
             if (userData.length > 0) {
-                setEmailInterval(userData[0].emailInterval / 60000); // Convert milliseconds to minutes
+                setEmailInterval(userData[0].emailInterval / 60000); 
             } else {
-                setEmailInterval(null); // Reset if no courses exist
+                setEmailInterval(null); 
             }
         } catch (error) {
             console.log(error.response?.data?.message || "Failed to fetch courses");
@@ -130,13 +129,22 @@ const Home = () => {
                 );
     
                 toast.success("Course deleted successfully!");
-                fetchCourses(userEmail); 
+    
+                setTimeout(() => {
+                    setCourses((prevCourses) => prevCourses.filter(course => course._id !== id));
+    
+                    if (courses.length === 1) {
+                        fetchCourses(userEmail);
+                    }
+                }, 500); 
+    
             } catch (error) {
                 console.log("Failed to delete course");
                 toast.error("Failed to delete course");
             }
         }
     };
+    
     
 
     const handleLogout = () => {
