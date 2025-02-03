@@ -82,7 +82,7 @@ const Home = () => {
                 {
                     userEmail,
                     name,
-                    course: course.toUpperCase(), // Ensures course code is always uppercase
+                    course: course.toUpperCase(), 
                     section: formattedSection,
                     emailInterval: emailInterval * 60000
                 },

@@ -130,7 +130,7 @@ const Login = () => {
         </div>
     );
 };
-// 
+
 const styles = {
     container: {
         minHeight: '80vh',
@@ -195,6 +195,7 @@ const styles = {
     },
     buttonSpacing: {
         marginTop: '1rem', 
+    },
     footer: {
         textAlign: 'center',
         marginTop: '3rem',
@@ -213,6 +214,6 @@ const styles = {
         color: '#475569',
         marginLeft: '0.5rem',
     },
-}};
+};
 
 export default Login;
