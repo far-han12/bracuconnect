@@ -20,7 +20,7 @@ const Home = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const token = localStorage.getItem('token');
-
+// 
     useEffect(() => {
         if (!token) {
             toast.error("Authentication failed. Redirecting to login...");
