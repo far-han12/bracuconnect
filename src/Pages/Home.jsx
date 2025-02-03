@@ -12,9 +12,11 @@ const Home = () => {
     const [name, setName] = useState('');
     const [course, setCourse] = useState('');
     const [section, setSection] = useState('');
-    const [emailInterval, setEmailInterval] = useState(0);
+    const [emailInterval, setEmailInterval] = useState(2);
     const [userEmail, setUserEmail] = useState('');
     const [courses, setCourses] = useState([]);
+    const [routineData, setRoutineData] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const token = localStorage.getItem('token');
@@ -28,35 +30,42 @@ const Home = () => {
 
         try {
             const decodedToken = jwtDecode(token);
-            if (!decodedToken || !decodedToken.email) {
-                throw new Error("Invalid token structure");
-            }
+            if (!decodedToken?.email) throw new Error("Invalid token");
             setUserEmail(decodedToken.email);
-            fetchCourses(decodedToken.email); 
+            fetchCourses(decodedToken.email);
         } catch (error) {
-            toast.error("Invalid or expired token. Redirecting to login...");
             localStorage.removeItem('token');
             navigate('/login');
         }
     }, [navigate, token]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/login');
-        toast.success("Logged out successfully");
-    };
+    useEffect(() => {
+        if (activeTab === 'classRoutine') {
+            const fetchRoutineData = async () => {
+                try {
+                    const response = await axios.get('https://usis-cdn.eniamza.com/connect.json');
+                    setRoutineData(response.data);
+                } catch (error) {
+                    console.log("Failed to fetch routine data");
+                }
+            };
+
+            fetchRoutineData();
+            const interval = setInterval(fetchRoutineData, 60000);
+            return () => clearInterval(interval);
+        }
+    }, [activeTab]);
 
     const fetchCourses = async (email) => {
         try {
             const response = await axios.post(
                 'https://api.malaysiabdmartshop.com/api/get-student',
                 { email },
-                { headers: { 'x-auth-token': token, 'Content-Type': 'application/json' } }
+                { headers: { 'x-auth-token': token } }
             );
-
             setCourses(response.data.userData || []);
         } catch (error) {
-            console.log( error.response?.data?.message )
+            console.log(error.response?.data?.message || "Failed to fetch courses");
         }
     };
 
@@ -65,28 +74,28 @@ const Home = () => {
         if (!token || isSubmitting) return;
     
         setIsSubmitting(true);
+        const formattedSection = section.padStart(2, '0');
     
-        // Format section to add a leading zero if it's a single digit
-        const formattedSection = section.length === 1 && parseInt(section, 10) <= 9 ? `0${section}` : section;
-    
-        const emailIntervalMs = Math.max(emailInterval * 60000, 1000);
         try {
             await axios.post(
                 'https://api.malaysiabdmartshop.com/api/add-student',
-                { userEmail, name, course, section: formattedSection, emailInterval: emailIntervalMs },
-                { headers: { 'x-auth-token': token, 'Content-Type': 'application/json' } }
+                {
+                    userEmail,
+                    name,
+                    course: course.toUpperCase(), // Ensures course code is always uppercase
+                    section: formattedSection,
+                    emailInterval: emailInterval * 60000
+                },
+                { headers: { 'x-auth-token': token } }
             );
     
             toast.success("Course added successfully!");
             setName('');
             setCourse('');
             setSection('');
-            setEmailInterval(20);
-    
-            // Refetch courses after adding
             fetchCourses(userEmail);
         } catch (error) {
-           console.log( error.response?.data?.message )
+            console.log(error.response?.data?.message || "Failed to add course");
         }
         setIsSubmitting(false);
     };
@@ -100,164 +109,448 @@ const Home = () => {
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
+            confirmButtonText: 'Delete'
         });
 
-        if (!result.isConfirmed) return;
-
-        try {
-            await axios.delete(
-                `https://api.malaysiabdmartshop.com/api/delete-student/${id}`,
-                { headers: { 'x-auth-token': token, 'Content-Type': 'application/json' } }
-            );
-
-            setCourses(courses.filter(course => course._id !== id));
-            toast.success("Course deleted successfully!");
-        } catch (error) {
-            toast.error("Failed to delete course.");
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(
+                    `https://api.malaysiabdmartshop.com/api/delete-student/${id}`,
+                    { headers: { 'x-auth-token': token } }
+                );
+                setCourses(courses.filter(course => course._id !== id));
+                toast.success("Course deleted successfully!");
+            } catch (error) {
+                console.log("Failed to delete course");
+            }
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/login');
+        toast.success("Logged out successfully");
+    };
+
+    const filteredRoutine = routineData.filter(item =>
+        item.courseCode?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const convertTo12HourFormat = (time) => {
+        let [hours, minutes] = time.split(":");
+        hours = parseInt(hours, 10);
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12; 
+        return `${hours}:${minutes} ${ampm}`;
+    };
+    
     return (
-        <div>
-            <Toaster position="top-center" reverseOrder={false} />
+        <div style={styles.container}>
+            <Toaster position="top-center" />
+            
+            <div style={styles.card}>
+                <div style={styles.header}>
+                    <h1 style={styles.title}>NotifySeat</h1>
+                    <button onClick={handleLogout} style={styles.logoutButton}>
+                        Logout
+                    </button>
+                </div>
 
-            <div style={containerStyle}>
-                <div style={cardStyle}>
-                    <div style={headerContainerStyle}>
-                        <h1 style={headerStyle}>Welcome to NotifySeat</h1>
-                        <button onClick={handleLogout} style={logoutButtonStyle}>Logout</button>
-                    </div>
+                <div style={styles.tabs}>
+                    <button 
+                        style={activeTab === 'addCourse' ? styles.activeTab : styles.tab} 
+                        onClick={() => setActiveTab('addCourse')}
+                    >
+                        Add Course
+                    </button>
+                    <button 
+                        style={activeTab === 'getCourses' ? styles.activeTab : styles.tab} 
+                        onClick={() => setActiveTab('getCourses')}
+                    >
+                        My Courses
+                    </button>
+                    <button 
+                        style={activeTab === 'classRoutine' ? styles.activeTab : styles.tab} 
+                        onClick={() => setActiveTab('classRoutine')}
+                    >
+                        Class Routine
+                    </button>
+                </div>
 
-                    <div style={tabsContainerStyle}>
-                        <button onClick={() => setActiveTab('addCourse')} style={activeTab === 'addCourse' ? tabStyleActive : tabStyle}>Add Course</button>
-                        <button onClick={() => setActiveTab('getCourses')} style={activeTab === 'getCourses' ? tabStyleActive : tabStyle}>Courses</button>
-                    </div>
-
-                    {activeTab === 'addCourse' && (
-                        <form onSubmit={handleAddCourse} style={formStyle}>
-                            <input type="text" value={userEmail} className="input-field" readOnly placeholder="Email" />
-                            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" required placeholder="Name" />
-                            <input type="text" value={course} onChange={(e) => setCourse(e.target.value)} className="input-field" required placeholder="Course" />
-                            <input
-    type="text"
-    value={section}
-    onChange={(e) => {
-        // Allow only numbers and remove leading zeros on input
-        const value = e.target.value.replace(/^0+/, '');
-        setSection(value);
-    }}
-    className="input-field"
-    required
-    placeholder="Section"
+                {activeTab === 'addCourse' && (
+                    <form onSubmit={handleAddCourse} style={styles.form}>
+                        <input 
+                            type="email" 
+                            value={userEmail} 
+                            readOnly 
+                            style={styles.input} 
+                            placeholder="Your Email"
+                        />
+                        <input 
+                            required 
+                            placeholder="Your Name" 
+                            value={name}
+                            onChange={(e) => setName(e.target.value)} 
+                            style={styles.input} 
+                        />
+                     <input 
+    required 
+    placeholder="Course Code" 
+    value={course}
+    style={styles.input} 
+    onChange={(e) => setCourse(e.target.value.toUpperCase())} 
 />
 
-                            <label>Email Notification Interval (minutes)</label>
-                            <input
-                                type="number"
-                                value={emailInterval}
-                                onChange={(e) => setEmailInterval(Math.max(e.target.value, 1))}
-                                className="input-field"
-                                required
-                                min="1"
-                                placeholder="Enter notification interval in minutes"
-                            />
-                            <button type="submit" style={buttonStyle} disabled={isSubmitting}>Add Course</button>
-                        </form>
-                    )}
+                        <input 
+                            required 
+                            placeholder="Section" 
+                            value={section}
+                            onChange={(e) => setSection(e.target.value.replace(/\D/g, ''))}
+                            style={styles.input} 
+                        />
+                        <input 
+                            type="number" 
+                            min="1" 
+                            value={emailInterval}
+                            onChange={(e) => setEmailInterval(e.target.value)}
+                            style={styles.input} 
+                            placeholder="Notification Interval (minutes)" 
+                        />
+                        <button 
+                            type="submit" 
+                            disabled={isSubmitting} 
+                            style={styles.submitButton}
+                        >
+                            {isSubmitting ? 'Adding...' : 'Add Course'}
+                        </button>
+                    </form>
+                )}
 
-                    {activeTab === 'getCourses' && (
-                        <div>
-                            {courses.length > 0 ? (
-                                <table style={tableStyle}>
-                                    <thead>
-                                        <tr>
-                                            <th style={tableCellStyle}>Name</th>
-                                            <th style={tableCellStyle}>Course</th>
-                                            <th style={tableCellStyle}>Section</th>
-                                            <th style={tableCellStyle}>Email Interval (minutes)</th>
-                                            <th style={tableCellStyle}>Actions</th>
+                {activeTab === 'getCourses' && (
+                    <div style={styles.tableContainer}>
+                        {courses.length > 0 ? (
+                            <table style={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Course</th>
+                                        <th>Section</th>
+                                        <th>Interval</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {courses.map((course) => (
+                                        <tr key={course._id}>
+                                            <td>{course.name}</td>
+                                            <td>{course.course}</td>
+                                            <td>{course.section}</td>
+                                            <td>{Math.floor(course.emailInterval / 60000)}m</td>
+                                            <td>
+                                                <button 
+                                                    onClick={() => handleDeleteCourse(course._id)}
+                                                    style={styles.deleteButton}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {courses.map((course, index) => (
-                                            <tr key={index}>
-                                                <td style={tableCellStyle}>{course.name}</td>
-                                                <td style={tableCellStyle}>{course.course}</td>
-                                                <td style={tableCellStyle}>{course.section}</td>
-                                                <td style={tableCellStyle}>{(course.emailInterval / 60000).toFixed()}</td>
-                                                <td style={tableCellStyle}>
-                                                    <button onClick={() => handleDeleteCourse(course._id)} style={deleteButtonStyle}>Delete</button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            ) : (
-                                <p style={noCoursesStyle}>No courses found. Please add a course.</p>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <p style={styles.noCourses}>No courses added yet</p>
+                        )}
+                    </div>
+                )}
+
+                {activeTab === 'classRoutine' && (
+                    <div style={styles.routineContainer}>
+                      <div style={styles.searchContainer}>
+                            <input 
+                                type="text" 
+                                placeholder="Search by course code..."
+                                value={searchTerm} 
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={styles.searchInput} 
+                            />
+                            {searchTerm && (
+                                <button 
+                                    onClick={() => setSearchTerm('')}
+                                    style={styles.clearButton}
+                                    aria-label="Clear search"
+                                >
+                                    ×
+                                </button>
                             )}
                         </div>
-                    )}
+                        <div style={styles.tableWrapper}>
+                            <table style={styles.routineTable}>
+                                <thead>
+                                    <tr>
+                                        <th>Section</th>
+                                        <th>Course</th>
+                                        <th>Faculties</th>
+                                        <th>Class Schedule</th>
+                                        <th>Lab Schedule</th>
+                                        <th>Seats Left</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {filteredRoutine.map((item) => (
+    <tr key={item.sectionId}>
+        <td>{item.sectionName}</td>
+        <td>{item.courseCode}</td>
+        <td>{item.faculties || 'N/A'}</td>
+        <td>
+            {item.sectionSchedule?.classSchedules?.map((schedule, i) => (
+                <div key={i} style={styles.scheduleItem}>
+                    <span style={styles.day}>{schedule.day}</span>
+                    <span>{convertTo12HourFormat(schedule.startTime)} - {convertTo12HourFormat(schedule.endTime)}</span>
                 </div>
+            )) || 'N/A'}
+        </td>
+        <td>
+            {item.labSchedules?.map((schedule, i) => (
+                <div key={i} style={styles.scheduleItem}>
+                    <span style={styles.day}>{schedule.day}</span>
+                    <span>{convertTo12HourFormat(schedule.startTime)} - {convertTo12HourFormat(schedule.endTime)}</span>
+                </div>
+            )) || 'N/A'}
+        </td>
+        <td>{item.capacity - item.consumedSeat}</td>
+    </tr>
+))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <footer style={footerStyle}>
-                <p style={footerTextStyle}>
-                    Developed by 
-                    <span style={developerStyle}>
-                        Tanvir Ishtiaq 
-                        <a href="https://github.com/TanvirXen" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
-                            <FaGithub size={20} />
+            <footer style={styles.footer}>
+                <p>Developed by 
+                    <span style={styles.dev}>
+                        Tanvir Ishtiaq
+                        <a href="https://github.com/TanvirXen" target="_blank" rel="noreferrer">
+                            <FaGithub style={styles.icon} />
                         </a>
-                        <a href="https://www.linkedin.com/in/tanvir-ishtiaq/" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
-                            <FaLinkedin size={20} />
+                        <a href="https://linkedin.com/in/tanvir-ishtiaq" target="_blank" rel="noreferrer">
+                            <FaLinkedin style={styles.icon} />
                         </a>
                     </span>
-                    <span>&</span>
-                    <span style={developerStyle}>
-                        Farhan Mahmud 
-                        <a href="https://github.com/far-han12" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
-                            <FaGithub size={20} />
+                    &amp;
+                    <span style={styles.dev}>
+                        Farhan Mahmud
+                        <a href="https://github.com/far-han12" target="_blank" rel="noreferrer">
+                            <FaGithub style={styles.icon} />
                         </a>
-                        <a href="https://www.linkedin.com/in/farhan-mahmud/" target="_blank" rel="noopener noreferrer" style={socialLinkStyle}>
-                            <FaLinkedin size={20} />
+                        <a href="https://linkedin.com/in/farhan-mahmud" target="_blank" rel="noreferrer">
+                            <FaLinkedin style={styles.icon} />
                         </a>
                     </span>
                 </p>
-                <p>Providing seamless solutions for your academic needs</p>
-                <p>© {new Date().getFullYear()} All Rights Reserved</p>
+                <p>© {new Date().getFullYear()} All rights reserved</p>
             </footer>
         </div>
     );
 };
 
-// Updated Styles
-const containerStyle = { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90vh' };
-const cardStyle = { width: '700px', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backgroundColor: '#ffffff' };
-const headerContainerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
-const logoutButtonStyle = { backgroundColor: '#ef4444', color: 'white', padding: '8px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer' };
-const headerStyle = { fontSize: '24px', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px' };
-const tabsContainerStyle = { display: 'flex', justifyContent: 'space-between', marginBottom: '16px' };
-const tabStyle = { flex: 1, padding: '10px', cursor: 'pointer', border: 'none', background: '#eee' };
-const tabStyleActive = { ...tabStyle, background: '#3b82f6', color: 'white' };
-const formStyle = { display: 'flex', flexDirection: 'column', gap: '10px' };
-const buttonStyle = { backgroundColor: '#3b82f6', color: 'white', padding: '10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', border: 'none' };
-const deleteButtonStyle = { backgroundColor: '#ef4444', color: 'white', padding: '5px', borderRadius: '5px', cursor: 'pointer', border: 'none' };
-const tableStyle = { width: '100%', marginTop: '16px', borderCollapse: 'collapse', textAlign: 'center' };
-const tableCellStyle = { padding: '8px', borderBottom: '1px solid #ddd' };
-const noCoursesStyle = { textAlign: 'center', color: '#666', marginTop: '16px' };
-const footerStyle = {
-    textAlign: 'center',
-    padding: '20px',
-    fontSize: '16px',
-    color: '#333',
-    backgroundColor: '#f9fafb',
-    marginTop: '20px',
-    borderTop: '1px solid #e5e7eb',
+const styles = {
+    container: {
+        minHeight: '90vh',
+   
+    },
+    card: {
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '1rem'
+    },
+    header: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '2rem'
+    },
+    title: {
+        fontSize: '2rem',
+        color: '#2563eb',
+        margin: 0
+    },
+    logoutButton: {
+        backgroundColor: '#ef4444',
+        color: 'white',
+        padding: '0.5rem 1rem',
+        borderRadius: '8px',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '0.9rem'
+    },
+    tabs: {
+        display: 'flex',
+        gap: '1rem',
+        marginBottom: '2rem'
+    },
+    tab: {
+        flex: 1,
+        padding: '1rem',
+        border: 'none',
+        borderRadius: '8px',
+        backgroundColor: '#f3f4f6',
+        cursor: 'pointer',
+        fontSize: '0.9rem'
+    },
+    activeTab: {
+        flex: 1,
+        padding: '1rem',
+        border: 'none',
+        borderRadius: '8px',
+        backgroundColor: '#2563eb',
+        color: 'white',
+        cursor: 'pointer',
+        fontSize: '0.9rem'
+    },
+    form: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem'
+    },
+    input: {
+        padding: '0.8rem',
+        borderRadius: '8px',
+        border: '1px solid #e5e7eb',
+        fontSize: '1rem',
+        width: '100%',
+        boxSizing: 'border-box'
+    },
+    submitButton: {
+        backgroundColor: '#2563eb',
+        color: 'white',
+        padding: '1rem',
+        borderRadius: '8px',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '1rem',
+        fontWeight: '500'
+    },
+    tableContainer: {
+        overflowX: 'auto',
+        borderRadius: '8px',
+        border: '1px solid #e5e7eb'
+    },
+    table: {
+        width: '100%',
+        borderCollapse: 'collapse',
+        backgroundColor: 'white'
+    },
+    deleteButton: {
+        backgroundColor: '#ef4444',
+        color: 'white',
+        padding: '0.3rem 0.6rem',
+        borderRadius: '6px',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '0.8rem'
+    },
+    noCourses: {
+        textAlign: 'center',
+        color: '#6b7280',
+        margin: '2rem 0',
+        padding: '1rem'
+    },
+    routineContainer: {
+        width: '100%',
+        overflow: 'hidden'
+    },
+    tableWrapper: {
+        maxHeight: '500px',
+        overflowY: 'auto',
+        overflowX: 'auto',
+        borderRadius: '8px',
+        border: '1px solid #e5e7eb',
+        marginTop: '1rem',
+        '::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px'
+        },
+        '::-webkit-scrollbar-thumb': {
+            backgroundColor: '#cbd5e1',
+            borderRadius: '4px'
+        }
+    },
+    routineTable: {
+        width: '100%',
+        borderCollapse: 'collapse',
+        minWidth: '800px'
+    },
+    scheduleItem: {
+        margin: '0.5rem 0',
+        padding: '0.5rem',
+        backgroundColor: '#f8fafc',
+        borderRadius: '4px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.25rem'
+    },
+    day: {
+        fontWeight: '600',
+        color: '#3b82f6',
+        fontSize: '0.8rem'
+    },
+    footer: {
+        textAlign: 'center',
+        marginTop: '3rem',
+        color: '#64748b',
+        padding: '2rem',
+        fontSize: '0.9rem'
+    },
+    dev: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        margin: '0 0.5rem'
+    },
+    icon: {
+        fontSize: '1.2rem',
+        color: '#475569',
+        marginLeft: '0.5rem'
+    }, searchContainer: {
+        position: 'relative',
+        marginBottom: '1rem'
+    },
+    searchInput: {
+        width: '100%',
+        padding: '0.8rem 2.5rem 0.8rem 1rem',
+        borderRadius: '8px',
+        border: '1px solid #e5e7eb',
+        fontSize: '1rem',
+        boxSizing: 'border-box',
+        transition: 'all 0.2s',
+        ':focus': {
+            outline: 'none',
+            borderColor: '#2563eb',
+            boxShadow: '0 0 0 2px rgba(37, 99, 235, 0.1)'
+        }
+    },
+    clearButton: {
+        position: 'absolute',
+        right: '1rem',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        background: 'transparent',
+        border: 'none',
+        color: '#94a3b8',
+        fontSize: '1.5rem',
+        cursor: 'pointer',
+        padding: '0',
+        lineHeight: '1',
+        transition: 'color 0.2s',
+        ':hover': {
+            color: '#ef4444'
+        }
+    },
 };
-const footerTextStyle = { fontSize: '18px', fontWeight: 'bold', marginBottom: '10px' };
-const developerStyle = { marginLeft: '10px', marginRight: '10px', display: 'inline-flex', alignItems: 'center', gap: '5px' };
-const socialLinkStyle = { marginLeft: '5px', color: '#0077b5', textDecoration: 'none' };
 
 export default Home;
