@@ -12,7 +12,8 @@ const Home = () => {
     const [name, setName] = useState('');
     const [course, setCourse] = useState('');
     const [section, setSection] = useState('');
-    const [emailInterval, setEmailInterval] = useState(2);
+    const [emailInterval, setEmailInterval] = useState(null);
+
     const [userEmail, setUserEmail] = useState('');
     const [courses, setCourses] = useState([]);
     const [routineData, setRoutineData] = useState([]);
@@ -63,12 +64,21 @@ const Home = () => {
                 { email },
                 { headers: { 'x-auth-token': token } }
             );
-            setCourses(response.data.userData || []);
+            const userData = response.data.userData || [];
+            setCourses(userData);
+    
+            // If user has courses, get the first course’s email interval
+            if (userData.length > 0) {
+                setEmailInterval(userData[0].emailInterval / 60000); // Convert milliseconds to minutes
+            } else {
+                setEmailInterval(null); // Reset if no courses exist
+            }
         } catch (error) {
             console.log(error.response?.data?.message || "Failed to fetch courses");
         }
     };
-
+    
+    
     const handleAddCourse = async (e) => {
         e.preventDefault();
         if (!token || isSubmitting) return;
@@ -111,20 +121,23 @@ const Home = () => {
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Delete'
         });
-
+    
         if (result.isConfirmed) {
             try {
                 await axios.delete(
                     `https://api.malaysiabdmartshop.com/api/delete-student/${id}`,
                     { headers: { 'x-auth-token': token } }
                 );
-                setCourses(courses.filter(course => course._id !== id));
+    
                 toast.success("Course deleted successfully!");
+                fetchCourses(userEmail); 
             } catch (error) {
                 console.log("Failed to delete course");
+                toast.error("Failed to delete course");
             }
         }
     };
+    
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -207,14 +220,16 @@ const Home = () => {
                             onChange={(e) => setSection(e.target.value.replace(/\D/g, ''))}
                             style={styles.input} 
                         />
-                        <input 
-                            type="number" 
-                            min="1" 
-                            value={emailInterval}
-                            onChange={(e) => setEmailInterval(e.target.value)}
-                            style={styles.input} 
-                            placeholder="Notification Interval (minutes)" 
-                        />
+           <input 
+    type="number" 
+    min="1" 
+    value={emailInterval !== null ? emailInterval : ''} 
+    onChange={(e) => setEmailInterval(e.target.value)}
+    style={styles.input} 
+    placeholder="Notification Interval (minutes)" 
+/>
+
+
                         <button 
                             type="submit" 
                             disabled={isSubmitting} 
