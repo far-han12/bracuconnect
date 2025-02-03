@@ -231,7 +231,7 @@ const Home = () => {
                         />
            <input 
     type="number" 
-    min="1" 
+    min="15" 
     value={emailInterval !== null ? emailInterval : ''} 
     onChange={(e) => setEmailInterval(e.target.value)}
     style={styles.input} 
