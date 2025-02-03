@@ -52,7 +52,7 @@ const Login = () => {
                 localStorage.setItem('token', response.data.token);
                 toast.success('OTP verified successfully. You are now logged in.');
                 setTimeout(() => {
-                    navigate('/'); // Redirect to home page
+                    navigate('/'); 
                 }, 1500);
             } else {
                 toast.error('Failed to verify OTP.');
@@ -179,6 +179,8 @@ const styles = {
         cursor: 'pointer',
         fontSize: '1rem',
         fontWeight: '500',
+        width:"100%",
+        marginTop:"15px"
     },
     footer: {
         textAlign: 'center',

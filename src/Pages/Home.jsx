@@ -23,7 +23,7 @@ const Home = () => {
 // 
     useEffect(() => {
         if (!token) {
-            toast.error("Authentication failed. Redirecting to login...");
+            console.log("Authentication failed. Redirecting to login...");
             navigate('/login');
             return;
         }
@@ -349,7 +349,6 @@ const Home = () => {
                         </a>
                     </span>
                 </p>
-                <p>© {new Date().getFullYear()} All rights reserved</p>
             </footer>
         </div>
     );
