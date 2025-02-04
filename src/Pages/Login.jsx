@@ -8,6 +8,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [isOtpSent, setIsOtpSent] = useState(false);
+    const [showDisclaimer, setShowDisclaimer] = useState(true);
     const navigate = useNavigate();
 
     const isValidEmail = (email) => {
@@ -77,9 +78,16 @@ const Login = () => {
                                 type="email"
                                 placeholder="Enter your email"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    setShowDisclaimer(false);
+                                }}
+                                onFocus={() => setShowDisclaimer(false)}
                                 style={styles.input}
                             />
+                            {showDisclaimer && (
+                                <p style={styles.disclaimer}>⚠️ By continuing, you agree that your email will be stored for authentication and security purposes.</p>
+                            )}
                             <div style={styles.buttonSpacing}></div>
                             <button onClick={handleSendOtp} style={styles.submitButton}>
                                 Send OTP
@@ -102,11 +110,6 @@ const Login = () => {
                     )}
                 </div>
             </div>
-
-            {/* Maintenance Notice */}
-            {/* <div style={styles.maintenanceNotice}>
-                <p>⚠️ The system is currently under maintenance.Our website will go live 15 minutes before advising begins.Thank you for your patience!</p>
-            </div> */}
 
             <footer style={styles.footer}>
                 <p>Developed by 
@@ -134,6 +137,7 @@ const Login = () => {
         </div>
     );
 };
+
 
 const styles = {
     container: {
@@ -227,6 +231,11 @@ const styles = {
         fontSize: '1.2rem',
         color: '#475569',
         marginLeft: '0.5rem',
+    },
+    disclaimer: {
+        fontSize: '0.85rem',
+        color: '#ff5e00',
+        marginTop: '0.5rem',
     },
 };
 
