@@ -231,11 +231,11 @@ const Home = () => {
                         />
            <input 
     type="number" 
-    min="15" 
+    min="35" 
     value={emailInterval !== null ? emailInterval : ''} 
     onChange={(e) => setEmailInterval(e.target.value)}
     style={styles.input} 
-    placeholder="Notification Interval (minutes)" 
+    placeholder="Notification Interval 35 minutes minimum" 
 />
 
 
