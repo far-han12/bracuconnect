@@ -104,9 +104,9 @@ const Login = () => {
             </div>
 
             {/* Maintenance Notice */}
-            <div style={styles.maintenanceNotice}>
+            {/* <div style={styles.maintenanceNotice}>
                 <p>⚠️ The system is currently under maintenance.Our website will go live 15 minutes before advising begins.Thank you for your patience!</p>
-            </div>
+            </div> */}
 
             <footer style={styles.footer}>
                 <p>Developed by 
