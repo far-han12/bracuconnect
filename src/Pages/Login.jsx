@@ -65,6 +65,7 @@ const Login = () => {
     return (
         <div style={styles.container}>
             <Toaster position="top-center" />
+         
             <div style={styles.card}>
                 <div style={styles.header}>
                     <h1 style={styles.title}>Seat Monitor</h1>
@@ -89,7 +90,7 @@ const Login = () => {
                                 <p style={styles.disclaimer}>⚠️ By continuing, you agree that your email will be stored for authentication and security purposes.</p>
                             )}
                             <div style={styles.buttonSpacing}></div>
-                            <button onClick={handleSendOtp} style={styles.submitButton}>
+                            <button disabled onClick={handleSendOtp} style={styles.submitButton}>
                                 Send OTP
                             </button>
                         </div>
@@ -103,14 +104,16 @@ const Login = () => {
                                 style={styles.input}
                             />
                             <div style={styles.buttonSpacing}></div>
-                            <button onClick={handleVerifyOtp} style={styles.verifyButton}>
+                            <button disabled onClick={handleVerifyOtp} style={styles.verifyButton}>
                                 Verify OTP
                             </button>
                         </div>
                     )}
                 </div>
             </div>
-
+            <div style={styles.maintenanceNotice}>
+                <p>⚠️ Advising Time for Round 2 has ended. We are temporarily shut down. See you next semester! ⚠️</p>
+            </div>
             <footer style={styles.footer}>
                 <p>Developed by 
                     <span style={styles.dev}>
@@ -179,23 +182,23 @@ const styles = {
         boxSizing: 'border-box',
     },
     submitButton: {
-        backgroundColor: '#2563eb',
+        backgroundColor: '#9CA3AF',  // Gray color for disabled state
         color: 'white',
         padding: '1rem',
         borderRadius: '8px',
         border: 'none',
-        cursor: 'pointer',
+        cursor: 'not-allowed',
         fontSize: '1rem',
         fontWeight: '500',
         width: '100%',
     },
     verifyButton: {
-        backgroundColor: '#10b981', 
+        backgroundColor: '#9CA3AF',  // Gray color for disabled state
         color: 'white',
         padding: '1rem',
         borderRadius: '8px',
         border: 'none',
-        cursor: 'pointer',
+        cursor: 'not-allowed',
         fontSize: '1rem',
         fontWeight: '500',
         width: '100%',
